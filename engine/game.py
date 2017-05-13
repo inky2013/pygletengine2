@@ -1,4 +1,7 @@
 import pyglet
+import engine.text
+import os
+from os.path import join as path_join
 
 
 class _SceneManager:
@@ -28,13 +31,39 @@ class _SceneManager:
                 return i
         return None
 
+    def add_scene(self, scene):
+        self.__setitem__(scene.name, scene)
+
+
+class AssetManager:
+    DIR_BASE = "assets/"
+    DIR_IMAGE = path_join(DIR_BASE, "images")
+    DIR_FONT = path_join(DIR_BASE, "fonts")
+    DIR_SOUND = path_join(DIR_BASE, "sound")
+    DIR_TEXT = path_join(DIR_BASE, "text")
+    DIR_SAVE = path_join("saves")
+    DIR_CONFIG = "config"
+
+    @staticmethod
+    def ensure_directory(d, split=False):
+        nd = d
+        if split:
+            nd = os.path.dirname(nd)
+        try:
+            os.makedirs(nd)
+        except FileExistsError:
+            pass
+        return d
+
 
 class Engine:
     _instance = None
 
-    def __init__(self, config):
+    def __init__(self, config, logger=None):
+        logger = engine.text.generate_logger(__name__, config.log_level)
         self.scene_manager = _SceneManager()
         self.config = config
+        self._window = pyglet.window.Window(fullscreen=config.fullscreen, resizable=config.resizable, height=config.height, width=config.width)
         Engine._instance = self
 
 
@@ -42,7 +71,9 @@ class Engine:
     def get_engine():
         return Engine._instance
 
-
+    def save_game(self):
+        for scene in self.scene_manager:
+            scene.save()
 
     def present(self):
 
@@ -127,7 +158,7 @@ class Engine:
 
         @self._window.event
         def on_mouse_enter(*args):
-           for scene in self.scene_manager:
+            for scene in self.scene_manager:
 
                 if scene.mouse_enter(*args) is False:
                     return

@@ -1,14 +1,17 @@
 class BaseScene:
-    def __init__(self, name, game):
+    def __init__(self, name):
         self.name = name
-        self.game = game
         self.z_index = 1
+        self._keys = list()
+
+    def save(self):
+        pass
 
     def activate(self):
         pass
 
     def close(self):
-        pass
+        self.save()
 
     def context_lost(self):
         pass
@@ -32,7 +35,10 @@ class BaseScene:
         pass
 
     def key_press(self, key, modifier):
-        pass
+        self._keys.append(key)
+
+    def key_release(self, key, modifier):
+        self._keys.remove(key)
 
     def mouse_motion(self, x, y, dx, dy):
         pass
